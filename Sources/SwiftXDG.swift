@@ -7,7 +7,7 @@ public enum XDGBaseDirectory {
     case config, data, cache, runtime
 }
 
-/// A directory search environment.
+/// XDG directory resolver.
 public struct XDGDirectories {
     /// The value of $XDG_CONFIG_HOME, if it is an absolute path.
     public let configHome: String
@@ -36,12 +36,14 @@ public struct XDGDirectories {
         dataDirs   = getPaths("XDG_DATA_DIRS")   ?? ["/usr/local/share", "/usr/share"]
     }
 
+    /// Concatenates the relative path to each directory and returns the first
+    /// element that currently exists on the user's filesystem.
     fileprivate func _find(dirs: [String], path: String) -> String? {
         let paths = dirs.map { join([$0, path]) }
         return paths.first(where: FileManager.default.fileExists)
     }
 
-    /// Finds the first existing file path under the given XDG base directory type.
+    /// Finds the highest priority file path under the given base directory, if one exists.
     public func find(type: XDGBaseDirectory, path: String) -> String? {
         switch type {
         case .config:
@@ -56,12 +58,14 @@ public struct XDGDirectories {
     }
 }
 
-/// Default instance.
+/// Default resolver instance.
 public let XDG = XDGDirectories()
 
 // MARK: Private Helpers
 
 fileprivate extension Optional {
+    /// Returns self if and only if self is .some and predicate(self) is true.
+    /// Otherwise, returns nil.
     fileprivate func require(_ predicate: (Wrapped) -> Bool) -> Optional<Wrapped> {
         guard let value = self else {
             return nil
@@ -70,14 +74,18 @@ fileprivate extension Optional {
     }
 }
 
+/// Predicate indicating if the given path is absolute.
 fileprivate func isAbsolute(path: String) -> Bool {
     return path.characters.first == "/"
 }
 
+/// Parses a path from an environment variable, returning it only if it is absolute.
 fileprivate func getPath(_ varName: String) -> String? {
     return ProcessInfo().environment[varName].require(isAbsolute)
 }
 
+/// Parses a comma-seperated list of paths from an environment variable, returning
+/// each item only if it is absolute.
 fileprivate func getPaths(_ varName: String) -> [String]? {
     return ProcessInfo().environment[varName]?
         .characters
@@ -86,10 +94,12 @@ fileprivate func getPaths(_ varName: String) -> [String]? {
         .filter(isAbsolute)
 }
 
+/// Joins file system paths together.
 fileprivate func join(_ dirs: [String]) -> String {
     return NSString.path(withComponents: dirs)
 }
 
+/// Joins a file system path to the current user's home directory.
 fileprivate func joinHome(_ path: String) -> String {
     return join([NSHomeDirectory(), path])
 }
