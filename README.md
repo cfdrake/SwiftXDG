@@ -35,9 +35,44 @@ Add the following line to the `dependencies` section of your `Package.swift`:
 .Package(url: "https://github.com/cfdrake/SwiftXDG", majorVersion: 0, minorVersion: 1)
 ```
 
-## API Documentation
+## API
 
-TODO.
+### Get XDG Preferences
+
+The following properties, exposing the user's XDG directories, are exposed:
+
+```swift
+XDG.configHome   // the value of $XDG_CONFIG_HOME
+XDG.dataHome     // the value of $XDG_DATA_HOME
+XDG.cacheHome    // the value of $XDG_CACHE_HOME
+XDG.runtimeDir   // the value of $XDG_RUNTIME_DIR
+XDG.configDirs   // the value of $XDG_CONFIG_DIRS (list)
+XDG.dataDirs     // the value of $XDG_DATA_DIRS (list)
+```
+
+If the values retrieved from the environment are not absolute paths, a fallback is returned.
+
+### Find a file path
+
+`SwiftXDG` queries are formed of two parts: the base directory to search (an `XDGBaseDirectory` enum value),
+and the relative path from that directory (a `String`). The base directory enum may have the value of `.config`,
+`.data`, `.cache`, or `.runtime`.
+
+```swift
+let path: String? = XDG.find(type: .config, path: "myapp/myapp.conf")
+```
+
+### Find a file
+
+```swift
+let handle: FileHandle? = XDG.findFile(type: .config, path: "myapp/myapp.conf")
+```
+
+### Read a file
+
+```swift
+let contents: String? = XDG.readFile(type: .config, path: "myapp/myapp.conf")
+```
 
 ## License
 
