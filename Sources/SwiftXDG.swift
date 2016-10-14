@@ -56,6 +56,24 @@ public struct XDGDirectories {
             return _find(dirs: [runtimeDir], path: path)
         }
     }
+
+    /// Finds the highest priority file path under the given base directory and returns
+    /// an open file handle for reading on it, if one exists.
+    public func findFile(type: XDGBaseDirectory, path: String) -> FileHandle? {
+        guard let path = find(type: type, path: path) else {
+            return nil
+        }
+        return FileHandle(forReadingAtPath: path)
+    }
+
+    /// Returns the UTF-8 contents of the highest priority file path under the given
+    /// base directory, if one exists.
+    public func readFile(type: XDGBaseDirectory, path: String) -> String? {
+        guard let data = findFile(type: type, path: path)?.readDataToEndOfFile() else {
+            return nil
+        }
+        return String(data: data, encoding: .utf8)
+    }
 }
 
 /// Default resolver instance.

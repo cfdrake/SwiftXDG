@@ -1,6 +1,6 @@
 # SwiftXDG
 
-Building a command line application in Swift? 🐦
+Building a command line application in Swift? 🐦 Be a good UNIX citizen!
 
 The [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
 specifies where user-specific configuration, data, cache, and runtime files should live and how applications should
@@ -16,14 +16,14 @@ Using `SwiftXDG`, you would simply write the following:
 ```swift
 import SwiftXDG
 
-if let configPath = XDG.find(type: .config, path: "myapp/myapp.conf") {
+if let config = XDG.readFile(type: .config, path: "myapp/myapp.conf") {
     // Found it! Parse configuration file, etc.  
 }
 ```
 
 Under the hood, `SwiftXDG` will consult `$XDG_CONFIG_HOME`, `$XDG_CONFIG_DIRS`, provide fallbacks if needed, and
-return the first matching file on the user's system (if one exists). For most users, this will be `~/.config/myapp/myapp.conf`,
-with a fallback to the potentially system-provided `/etc/xdg/myapp/myapp.conf`.
+return the contents of the first matching file on the user's system (if one exists). For most users, this will be
+the file at `~/.config/myapp/myapp.conf`, with a fallback to the potentially system-provided `/etc/xdg/myapp/myapp.conf`.
 
 ## Installation
 
